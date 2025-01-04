@@ -11,80 +11,36 @@ import {
   Search,
   Settings,
   ShoppingBagIcon,
+  Wallet,
 } from "lucide-react";
-
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "./ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 import { cn } from "../lib/utils";
-import {
-  useHref,
-  useLocation,
-  useNavigation,
-  useResolvedPath,
-  useRoutes,
-} from "react-router-dom";
+
+
 
 // Menu items.
 const items = [
   {
-      title: "Home",
+      title: "Dachboard",
       url: "/home",
       icon: Home,
   },
   {
-      title: "Reports",
-      url: "/reports",
-      icon: ChartBar, // Use appropriate icon
-  },
-  {
       title: "Transactions",
       url: "/transactions",
-      icon: Inbox,
-  },
-  {
-      title: "Shopping List",
-      url: "/shoppingList",
-      icon: ShoppingBagIcon,
-  },
-  {
-      title: "Saving Goals",
-      url: "/savingGoals",
-      icon: GoalIcon,
+      icon: ChartBar, // Use appropriate icon
   },
   {
       title: "Budgets",
       url: "/budgets",
-      icon: Banknote,
+      icon: Wallet,
   },
   {
-      title: "Categories",
-      url: "/categories",
-      icon: FolderArchive,
-  },
-  {
-      title: "Bills",
-      url: "/bills",
-      icon: BrickWall,
-  },
-  {
-      title: "Add Account", // Added Add Account to the sidebar
-      url: "/accounts/new",
-      icon: PlusCircle,
-  },
-  {
-      title: "Accounts", // Link to list of accounts
-      url: "/accounts",
-      icon: FolderArchive, // Or another relevant icon
-  }
+    title: "Shopping List",
+    url: "/shoppingList",
+    icon: Wallet,
+},
+  
 ];
 
 export function AppSidebar({ path }: { path: string }) {

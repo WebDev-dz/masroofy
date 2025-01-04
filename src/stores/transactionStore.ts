@@ -161,7 +161,7 @@ const transactions : Transaction[] = [
 
 
 export const useTransactionStore = create<TransactionStore>()(persist((set, get) => ({
-  transactions: transactions,
+  transactions: [],
 
   fetchTransactions: async () => {
     try {
@@ -210,7 +210,14 @@ export const useTransactionStore = create<TransactionStore>()(persist((set, get)
       return { data: null, loading: false, error: error as Error };
     }
   },
-
+  async calculateTotalExpenses() {
+    const totalExpenses= get().transactions.reduce((acc, tr) => (acc + tr.type == "expense" ? tr.amount : 0),0)
+    return {data: totalExpenses, error: null, loading: false}
+  },
+  async calculateTotalIncomes() {
+    const totalincomes= get().transactions.reduce((acc, tr) => (acc + tr.type == "income" ? tr.amount : 0),0)
+    return {data: totalincomes, error: null, loading: false}
+  },
   addTransaction: async (transaction: Transaction) => {
     try {
       const response = await new Promise<Transaction>((resolve) =>
@@ -264,7 +271,7 @@ export const useTransactionStore = create<TransactionStore>()(persist((set, get)
     }
   },
 }), {
-  name: 'account-storage', // Name of the storage key
+  name: 'transaction-storage', // Name of the storage key
 })); 
 
 

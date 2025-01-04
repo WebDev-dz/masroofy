@@ -344,7 +344,7 @@ export const useBudgetStore = create<BadgetStore>()(
       },
     }),
     {
-      name: "account-storage", // Name of the storage key
+      name: "budgets-storage", // Name of the storage key
     }
   )
 );

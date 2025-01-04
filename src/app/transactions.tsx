@@ -6,7 +6,8 @@ import { getColumns } from "../components/transactions/transactionTable/columns"
 import { useTransactionStore } from "../stores/transactionStore";
 import { useAccountStore } from "../stores/accountStore";
 import { FormDialog } from "../components/FormDialog";
-import { Button } from "../components/ui/button";
+import { Button, buttonVariants } from "../components/ui/button";
+import { Link } from "react-router-dom";
 
 interface Category {
   id: string;
@@ -93,10 +94,7 @@ const Transactions: React.FC = () => {
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Transactions</h1>
-        <CategoryFormDialog
-          title="New Category"
-          triggerButton={<Button> Add Category</Button>}
-        ></CategoryFormDialog>
+        <Link to = "/transaction/new" className= {buttonVariants({variant: "default"})}>Add Transaction</Link>
       </div>
 
      
@@ -139,7 +137,7 @@ const Transactions: React.FC = () => {
 
       {/* Transactions Table */}
       {/*  */}
-      <DataTable data={transactions} columns={getColumns(accounts)} />
+      <DataTable data={filteredTransactions} columns={getColumns(accounts)} />
 
       {/* No transactions message */}
       {filteredTransactions.length === 0 && (

@@ -3,10 +3,19 @@ import { AccountStoreActions, AccountStoreState } from '../types/stores';
 import { Account } from '../types/models';
 import { default_accounts } from '../constants/accounts';
 import { persist } from 'zustand/middleware'
-
+import { exchangeRates } from "../constants/currencies"
 
 export const useAccountStore = create<AccountStoreState & AccountStoreActions>()(persist((set, get) => ({
   accounts: default_accounts,
+
+  calculateTotalBalance: async () => {
+     const calculateTotal = get().accounts.reduce((acc, a) => {
+      // @ts-ignore
+      return acc + (exchangeRates[a.currency].inverseRate * a.balance)
+    }, 0)
+    return {data: calculateTotal, loading: false, error: null}
+
+  },
 
   fetchAccounts: async () => {
     try {
@@ -14,10 +23,7 @@ export const useAccountStore = create<AccountStoreState & AccountStoreActions>()
       const response = await new Promise<Account[]>((resolve) =>
         setTimeout(
           () =>
-            resolve([
-              { accountId: 1, balance: 1000, currency: 'USD', type: 'checking', color: 'blue', name: 'Main Checking', isActive: true },
-              { accountId: 2, balance: 5000, currency: 'USD', type: 'savings', color: 'green', name: 'Emergency Fund', isActive: true },
-            ]),
+            resolve([]),
           1000
         )
       );

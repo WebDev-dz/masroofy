@@ -31,7 +31,7 @@ const shoppingListData : ShoppingList[] = [
 
 type ShoppingListStore = Store<ShoppingListStoreState, ShoppingListStoreActions>
 export const useShoppingListStore = create<ShoppingListStore>()(persist((set, get) => ({
-  shoppingLists: shoppingListData,
+  shoppingLists: [],
 
   fetchShoppingLists: async () => {
     try {

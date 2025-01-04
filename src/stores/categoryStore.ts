@@ -6,7 +6,9 @@ import { persist } from 'zustand/middleware'
 
 type CategoryStore = Store<CategoryStoreState, CategoryStoreActions>
 export const useCategoryStore = create <CategoryStore>()(persist((set, get) => ({
-    categories: [],
+    categories: [
+      
+    ],
   
     fetchCategories: async () => {
       try {

@@ -10,37 +10,40 @@ import SavingGoals from "./app/savingGoals";
 import ShoppingListPage from "./app/shoppingList";
 import CategoriesPage from "./app/categories";
 import AddAccount from "./app/pages/AddAccount";
-import LoginPage from "./app/auth/login/page";
-import RegisterPage from "./app/auth/register/page";
+
 import MarketingPage from "./app/(marketing)/page"; // Import the marketing page
 import BlogPage from "./app/(marketing)/blog/page";
 import PricingPage from "./app/(marketing)/pricing/page";
 import { SidebarProvider } from "./components/ui/sidebar";
 import { Toaster } from "./components/ui/toaster";
+import AddTransaction from "./app/addTransaction";
+import TransactionDetails from "./app/pages/TransactionDetails";
+import AccountDetails from "./app/pages/AccountDetails";
+import BudgetDetails from "./app/pages/BudgetDetails";
+import AddBudget from "./app/pages/AddBudget";
+import { currencies } from "./constants";
+import { useAccountStore } from "./stores/accountStore";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const path = location.pathname;
-
+ console.log({path})
   const pathsWithSidebar = [
-    "/home", // Changed to /home
-    "/reports",
-    "/transactions",
-    "/bills",
-    "/budgets",
-    "/savingGoals",
-    "/shoppingList",
-    "/categories",
-    "/accounts",
+    "",
+
+    "/", // Changed to /home
+    "/blog",
+    "/pricing",
+    
   ];
   
-  const showSidebar = pathsWithSidebar.some((p) => path.startsWith(p));
+  const showSidebar = pathsWithSidebar.some((p) => !path.startsWith(p)) && path !== "/";
   const showNavbar = path === "/"
 
   return (
-    <div className="flex w-screen">
+    <div className="flex w-screen overflow-hidden">
       {showSidebar && <AppSidebar path={path} />}
-      <div className="flex min-h-screen flex-col flex-1">
+      <div className="flex min-h-screen flex-col flex-1 overflow-hidden">
         {showNavbar && <header className="container z-40 bg-background">
           <div className="flex h-20 items-center justify-between py-6">
             <div className="flex gap-6 md:gap-10">
@@ -97,9 +100,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
             <nav>
               <a
                 className="inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 rounded-md px-4"
-                href="/login"
+                href="/home"
               >
-                Login
+                dashbaord
               </a>
             </nav>
           </div>
@@ -112,14 +115,19 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+
+  // @ts-ignore
+ 
+
+  
+
   return (
     <SidebarProvider>
       <BrowserRouter>
       <AppLayout>
         <Routes>
           {/* Auth Routes (Public) */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<RegisterPage />} />
+          
 
           {/* Protected Routes (Require Authentication) */}
           <Route element={<PrivateRoute />}>
@@ -134,8 +142,15 @@ function App() {
             <Route path="/savingGoals" element={<SavingGoals />} />
             <Route path="/shoppingList" element={<ShoppingListPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
-            <Route path="/accounts/new" element={<AddAccount />} />
-            {/* <Route path="/accounts/:accountId" element={<AccountDetailsPage />} /> */}
+            <Route path="/account/new" element={<AddAccount />} />
+            <Route path="/transaction/new" element={<AddTransaction />} />
+            <Route path="/transaction/:id" element={<TransactionDetails  />} />
+
+            <Route path="/account/:id" element={<AccountDetails />} />
+            <Route path="/budget/:id" element={<BudgetDetails />} />
+            <Route path="/budget/new" element={<AddBudget />} />
+
+
             {/* <Route path="/accounts" element={<AccountsListPage />} /> */}
           </Route>
         </Routes>

@@ -9,9 +9,13 @@ import { DataTableColumnHeader } from "../../ui/data-table/data-table-column-hea
 import { labels, statuses, priorities } from "./data";
 import { Account, Category, Transaction } from "@/src/types/models";
 import { cn } from "../../../lib/utils";
+import { Link } from "react-router-dom";
 
-export const getColumns = (accounts: Account[]) =>
-  [
+export const getColumns = (accounts: Account[]) =>{
+
+
+  
+  return ([
     {
       id: "select",
       header: ({ table }) => (
@@ -38,15 +42,43 @@ export const getColumns = (accounts: Account[]) =>
     },
     {
       accessorKey: "transactionId",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Id" />
-      ),
-      cell: ({ row }) => (
-        <div className="w-[50px]">{row.getValue("transactionId")}</div>
-      ),
-      enableSorting: false,
-      enableHiding: false,
+      header: ({column}) => (<DataTableColumnHeader className="w-20" column={column} title="Transaction Id" />),
+      cell: ({row}) => (<Link className="w-full text-center" to= {`/transaction/${row.getValue("transactionId")}`} >
+        <div className="w-full">  {row.getValue("transactionId")} </div> </Link>)
     },
+    {
+      accessorKey: "fromAccountId",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Account" />
+      ),
+      cell: ({ row }) => {
+        const account = accounts.find(
+          (label) => label.accountId === row.original.fromAccountId
+        );
+
+        return (
+          <div className="flex space-x-2">
+            {account && <h4>{account.name}</h4>}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "date",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="date" />
+      ),
+      cell: ({ row }) => {
+        
+
+        return (
+          <div className="flex space-x-2">
+            {(new Date(row.getValue("date"))).toDateString()}
+          </div>
+        );
+      },
+    },
+    
     {
       accessorKey: "fromAccountId",
       header: ({ column }) => (
@@ -70,6 +102,9 @@ export const getColumns = (accounts: Account[]) =>
         <DataTableColumnHeader column={column} title="Amount" />
       ),
       cell: ({ row }) => {
+        const account = accounts.find(
+          (label) => label.accountId === row.original.fromAccountId
+        );
         const type = row.getValue("type") as "income" | "expense";
         return (
           <div
@@ -78,7 +113,7 @@ export const getColumns = (accounts: Account[]) =>
               "text-red-500": type == "expense",
             })}
           >
-            { (type == "expense" ? "-" : "+") + row.getValue("amount")}
+            { (type == "expense" ? "-" : "+") + row.getValue("amount") + " " + account?.currency || ""}
           </div>
         );
       },
@@ -94,40 +129,14 @@ export const getColumns = (accounts: Account[]) =>
         const category = row.getValue("category") as Category;
         return (
           <div className="w-[80px] flex">
-            {category.icon + " " + category.name}
+            {category?.icon + " " + category?.name}
           </div>
         );
       },
       enableSorting: false,
       enableHiding: false,
     },
-    {
-      accessorKey: "status",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Status" />
-      ),
-      cell: ({ row }) => {
-        const status = statuses.find(
-          (status) => status.value === row.getValue("status")
-        );
-
-        if (!status) {
-          return null;
-        }
-
-        return (
-          <div className="flex w-[100px] items-center">
-            {status.icon && (
-              <status.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-            )}
-            <span>{status.label}</span>
-          </div>
-        );
-      },
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
-    },
+    
     {
       accessorKey: "type",
       header: ({ column }) => (
@@ -160,5 +169,5 @@ export const getColumns = (accounts: Account[]) =>
       id: "actions",
       cell: ({ row }) => <DataTableRowActions row={row} />,
     },
-  ] as ColumnDef<Transaction>[];
+  ]) as ColumnDef<Transaction>[]} ;
 

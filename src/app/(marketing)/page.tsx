@@ -14,7 +14,7 @@ const siteConfig = {
 export default function IndexPage() {
   return (
     <>
-      <section className="container space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
+      <section className="container mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
         <div className="flex max-w-[64rem] flex-col items-center gap-4 text-center">
           <span className="rounded-2xl bg-emerald-100 px-4 py-1.5 text-sm font-medium text-emerald-800">
             Take Control of Your Finances
@@ -41,7 +41,7 @@ export default function IndexPage() {
       </section>
       <section
         id="features"
-        className="space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24"
+        className="container space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24"
       >
         <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
@@ -132,7 +132,7 @@ export default function IndexPage() {
           </div>
         </div>
       </section>
-      <section id="get-started" className="py-8 md:py-12 lg:py-24">
+      <section id="get-started" className="container py-8 md:py-12 lg:py-24">
         <div className="mx-auto flex max-w-[58rem] flex-col items-center justify-center gap-4 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
             Start Managing Your Money Better

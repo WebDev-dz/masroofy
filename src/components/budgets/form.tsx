@@ -1,200 +1,284 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { Button } from "../ui/button"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon, Pencil } from "lucide-react";
+
+import { z } from "zod";
+import { useToast } from "../../hooks/use-toast";
+import { ToastAction } from "../ui/toast";
 import {
   Form,
-  FormControl,
-  FormDescription,
   FormField,
+  FormControl,
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form"
-import { Input } from "../ui/input"
+} from "../ui/form";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select"
-import { Checkbox } from "../ui/checkbox"
-import { budgetSchema } from "../../schemas/validationSchema"
-import { categories } from "@/src/constants"
+} from "../ui/select";
+import { useBudgetStore } from "../../stores/budgetStore";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { AsyncOperation, Budget } from "../../types/models";
+import { useState } from "react";
+import { budgetSchema } from "../../schemas/validationSchema";
+import { Checkbox } from "../ui/checkbox";
+import { useAccountStore } from "../../stores/accountStore";
+import { useCategoryStore } from "../../stores/categoryStore";
+type EntityFormType = "readonly" | "update" | "create";
 
-// Import your existing schemas (accountSchema and categorySchema)
+type EntityFormProps<T> = {
+  type: EntityFormType;
+  title: string;
+  value?: T;
+  onSubmit?: (data: T) => AsyncOperation<any>;
+};
 
-// Assuming isoDateString is a custom validation for ISO date format
-const isoDateString = z.string().refine((val) => !isNaN(Date.parse(val)), {
-  message: "Invalid date format, must be ISO 8601",
-})
+type BudgetFormProps = EntityFormProps<Budget>;
 
-
-
-export function BudgetForm() {
-  const form = useForm({
+export default function BudgetForm({ type, value, title, onSubmit }: BudgetFormProps) {
+  const [isEditing, setIsEditing] = useState(true);
+  const { toast } = useToast();
+  const { accounts } = useAccountStore();
+  const { categories } = useCategoryStore();
+  const form = useForm<z.infer<typeof budgetSchema>>({
     resolver: zodResolver(budgetSchema),
-    defaultValues: {
-      budgetId: 1,
-      account: {
-        accountId: 1,
-        balance: 0,
-        currency: "USD",
-        type: "checking",
-        color: "#ffffff",
-        isActive: true,
-      },
-      period: "Month",
-      limit: 0,
-      category: undefined, // Optionally, set a default category if necessary
-      startDate: new Date().toISOString().split("T")[0], // Default to today's date
-      isRecurring: false,
-    },
-  })
+    defaultValues: type === "create" ? {} : value,
+  });
 
-  const onSubmit = (data: any) => {
-    console.log(data)
+  async function handleSubmit(data: z.infer<typeof budgetSchema>) {
+    if (onSubmit) {
+      const response = await onSubmit(data as Budget);
+      if (response) {
+        toast({
+          title: "Budget Submitted",
+          action: <ToastAction altText="Undo">Undo</ToastAction>,
+        });
+      }
+    }
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="budgetId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Budget ID</FormLabel>
-              <FormControl>
-                <Input placeholder="Budget ID" type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <Card>
+      <CardHeader className="flex flex-row justify-between">
+        <CardTitle className="text-xl"> {title} </CardTitle>
+        {type == "update" &&
+          (!isEditing ? (
+            <Button
+              onClick={(e) => {
+                setIsEditing(true);
+              }}
+            >
+              {" "}
+              <Pencil />{" "}
+            </Button>
+          ) : (
+            <Button
+              onClick={(e) => {
+                handleSubmit(form.getValues());
+                setIsEditing(false);
+              }}
+            >
+              {" "}
+              Save{" "}
+            </Button>
+          ))}
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
+            {/* Amount */}
+            <FormField
+              control={form.control}
+              name="budgetId"
+              render={({ field: { onChange, ...field } }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">Budget Id</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Amount"
+                      onChange={(e) => {
+                        form.setValue("budgetId", parseFloat(e.target.value));
+                      }}
+                      readOnly={type === "readonly" || !isEditing}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="account.accountId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Account ID</FormLabel>
-              <FormControl>
-                <Input placeholder="Account ID" type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="account"
+              render={({ field }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">Account</FormLabel>
+                  <Select
+                    disabled={!isEditing}
+                    onValueChange={(c) => form.setValue("account", accounts.find(a => a?.accountId == parseInt(c))!)}
+                    defaultValue={`${field.value?.accountId}`}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select account" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {accounts.map((account) => (
+                        <SelectItem value={`${account?.accountId}`}>
+                          {account.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="period"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Period</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select period" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="One time">One time</SelectItem>
-                    <SelectItem value="Month">Month</SelectItem>
-                    <SelectItem value="Week">Week</SelectItem>
-                    <SelectItem value="Year">Year</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="period"
+              render={({ field }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">Period</FormLabel>
+                  <Select
+                    disabled={type === "readonly" || !isEditing}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select period" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="One time">One time</SelectItem>
+                      <SelectItem value="Month">Month</SelectItem>
+                      <SelectItem value="Week">Week</SelectItem>
+                      <SelectItem value="Year">Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="limit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Limit</FormLabel>
-              <FormControl>
-                <Input placeholder="Budget Limit" type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            {/* Amount */}
+            <FormField
+              control={form.control}
+              name="limit"
+              render={({ field: { onChange, ...field } }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">Limit</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Amount"
+                      onChange={(e) => {
+                        form.setValue("limit", parseFloat(e.target.value));
+                      }}
+                      readOnly={type === "readonly" || !isEditing}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-<FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select account type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((c) => (
-                        <SelectItem key = {c.id} value= {c.name}>Checking</SelectItem>
-                    ))}
-                    
-                    
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">Category</FormLabel>
+                  <Select
+                    disabled={type === "readonly" || !isEditing}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value?.id}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                    {categories.map((category) => (
+                        <SelectItem value={`${category.id}`}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="startDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Start Date</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="startDate"
+              render={({ field }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">Start Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        {/* <FormField
-          control={form.control}
-          name="endDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>End Date (Optional)</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
+            <FormField
+              control={form.control}
+              name="endDate"
+              render={({ field }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">End Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="isRecurring"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Is Recurring</FormLabel>
-              <FormControl>
-              <Checkbox checked={field.value} ref={field.ref} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
-  )
+            <FormField
+              control={form.control}
+              name="isRecurring"
+              render={({ field: { onChange, ...field } }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">Is Recurring</FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      disabled={type === "readonly" || !isEditing}
+                      checked={field.value}
+                      onCheckedChange={(e) =>
+                        form.setValue("isRecurring", e as boolean)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Submit Button */}
+            {type == "create" && <Button type="submit">{"Create"}</Button>}
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
 }

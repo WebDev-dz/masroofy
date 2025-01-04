@@ -27,11 +27,15 @@ export type AccountStoreActions = {
   updateAccount: (updatedAccount: Account) => AsyncOperation<Account>;
   deleteAccount: (accountId: number) => AsyncOperation<Account>;
   fetchAccounts: () => AsyncOperation<Account[]>;
+  calculateTotalBalance: () => AsyncOperation<number>;
 };
 
 // Transaction Store Types
 export type TransactionStore = {
   transactions: Transaction[];
+  calculateTotalIncomes: ()=> AsyncOperation<number>;
+  calculateTotalExpenses: ()=> AsyncOperation<number>;
+
   addTransaction: (transaction: Transaction) => AsyncOperation<Transaction>;
   updateTransaction: (updatedTransaction: Transaction) => AsyncOperation<Transaction>;
   deleteTransaction: (transactionId: number) => AsyncOperation<Transaction>;

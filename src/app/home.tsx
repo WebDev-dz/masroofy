@@ -11,6 +11,8 @@ import {
   CardContent,
 } from "../components/ui/card";
 import { PlusCircle } from "lucide-react";
+import { se } from "date-fns/locale";
+import { AsyncOperation } from '../types/models';
 
 interface Transaction {
   id: string;
@@ -26,14 +28,14 @@ const Home: React.FC = () => {
   const [totalIncome, setTotalIncome] = useState<number>(0);
   const [totalExpense, setTotalExpense] = useState<number>(0);
   const [balance, setBalance] = useState<number>(0);
-  const { accounts } = useAccountStore((store) => store);
+  const { accounts, calculateTotalBalance } = useAccountStore((store) => store);
   const { widgets, layout, name } = defaultDashboardConfig;
 
   // Calculate totals whenever transactions change
   useEffect(() => {
     // This will be replaced with actual data fetching
     // For now using dummy calculations
-    calculateTotals();
+    calculateTotalBalance().then((ba) => { console.log({ba}); setBalance(Math.floor(ba.data!)) });
   }, []);
 
   const calculateTotals = () => {
@@ -45,9 +47,9 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
+    <div className=" mx-auto p-4 space-y-4">
       {/* Financial Overview Cards */}
-      <section className="space-y-4">
+      <section className=" space-y-4">
         <h1 className="text-2xl font-bold">Overview</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-green-100 p-4 rounded-lg shadow">
@@ -66,7 +68,7 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
-      <section className="space-y-4">
+      <section className=" space-y-4">
         <h1 className="text-2xl font-bold">Accounts</h1>
 
         <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3 w-full">
