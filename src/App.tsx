@@ -53,32 +53,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                   Masroofy
                 </span>
               </a>
-              <nav className="hidden gap-6 md:flex">
-                <a
-                  className="flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60"
-                  href="/#features"
-                >
-                  Features
-                </a>
-                <a
-                  className="flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60"
-                  href="/pricing"
-                >
-                  Pricing
-                </a>
-                <a
-                  className="flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60"
-                  href="/blog"
-                >
-                  Blog
-                </a>
-                <a
-                  className="flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60"
-                  href="/docs"
-                >
-                  Documentation
-                </a>
-              </nav>
+              
               <button className="flex items-center space-x-2 md:hidden">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
