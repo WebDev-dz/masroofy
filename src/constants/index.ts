@@ -1,28 +1,36 @@
-import { Dashboard, DashboardWidget } from '../types/settings';
-import { currencies } from './currencies';
+import { Category } from "../types/models";
+import { Dashboard, DashboardWidget } from "../types/settings";
+import { currencies } from "./currencies";
 
+export const categories: Category[] = [
+  { id: "1", name: "Food", icon: "pizza", theme: "red", isActive: false },
+  { id: "2", name: "Travel", icon: "airplane", theme: "blue", isActive: true },
+  {
+    id: "3",
+    name: "Electronics",
+    icon: "laptop",
+    theme: "blue",
+    isActive: true,
+  },
+  {
+    id: "4",
+    name: "Entertainment",
+    icon: "media",
+    theme: "blue",
+    isActive: true,
+  },
+  {
+    id: "5",
+    name: "Clothing",
+    icon: "shirt",
+    theme: "blue",
+    isActive: true,
+  },
+];
 
+export { currencies };
 
-
-
-
-
-
-
-export const categories = [
-    { id: "1", name: "Food", icon: "🍔", theme: "red", isActive: false },
-    { id: "2", name: "Travel", icon: "✈️", theme: "blue", isActive: true },
-  ]
-
-
-
-
-
-
-export { currencies }
-
-
-export const defaultDashboardConfig : Dashboard = {
+export const defaultDashboardConfig: Dashboard = {
   dashboardId: 1,
   name: "Default Dashboard",
   layout: "grid",
@@ -91,15 +99,13 @@ export const defaultDashboardConfig : Dashboard = {
     //   position: { x: 0, y: 9, width: 8, height: 3 },
     //   goalIds: [301, 302],
     //   showProjections: false,
-    // }, 
+    // },
     {
       id: "8",
       type: "shopping-list",
       title: "Shopping List",
-      "position" : {x: 0, y : 9,width: 3 ,height: 4},
-      "shoppingLists": []
-
-    }
+      position: { x: 0, y: 9, width: 3, height: 4 },
+      shoppingLists: [],
+    },
   ],
 };
-

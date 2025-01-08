@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -24,10 +25,20 @@ import {
   SelectValue,
 } from "../ui/select";
 import { shoppingListSchema } from "../../schemas/validationSchema";
+import { AsyncOperation, ShoppingList } from "../../types/models";
 
-type ShoppingFormProps = {}
+type EntityFormType = "readOnly" | "update" | "create";
 
-const ShoppingForm = (props: ShoppingFormProps) => {
+type EntityFormProps<T> = {
+  type: EntityFormType;
+  title: string;
+  value?: T;
+  onSubmit?: (data: T) => AsyncOperation<any>;
+};
+
+type ShoppingFormProps = EntityFormProps<ShoppingList>
+
+const ShoppingListForm = ({title, type, value, onSubmit}: ShoppingFormProps) => {
     const form = useForm<z.infer<typeof shoppingListSchema>>({
         resolver: zodResolver(shoppingListSchema),
         defaultValues: {
@@ -41,7 +52,7 @@ const ShoppingForm = (props: ShoppingFormProps) => {
         name: "items",
       });
     
-      function onSubmit(data: z.infer<typeof shoppingListSchema>) {
+      function handleSubmit(data: z.infer<typeof shoppingListSchema>) {
         toast({
             title: "Transaction Submitted",
             description: JSON.stringify(data, null, 2),
@@ -53,7 +64,7 @@ const ShoppingForm = (props: ShoppingFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {fields.map((item, index) => (
           <div key={item.id} className="space-y-4 border-b pb-4 mb-4">
             <FormField
@@ -131,4 +142,4 @@ const ShoppingForm = (props: ShoppingFormProps) => {
   )
 }
 
-export default ShoppingForm
+export default ShoppingListForm;

@@ -7,6 +7,7 @@ import { persist } from 'zustand/middleware'
 const shoppingListData : ShoppingList[] = [
   {
     name: "Groceries",
+    id: "1",
     items: [
       { itemName: "Apples", price: 4,  },
       { itemName: "Bread",  price: 2 },
@@ -15,13 +16,18 @@ const shoppingListData : ShoppingList[] = [
   },
   {
     name: "Electronics",
+    id: "2",
     items: [
       { itemName: "USB Cable", price: 1 },
       { itemName: "Phone Charger", price: 2,  },
     ],
+      
+
   },
   {
     name: "Clothing",
+    id: "3",
+
     items: [
       { itemName: "T-Shirt", price: 3 },
       { itemName: "Jeans", price: 2 },
@@ -31,7 +37,7 @@ const shoppingListData : ShoppingList[] = [
 
 type ShoppingListStore = Store<ShoppingListStoreState, ShoppingListStoreActions>
 export const useShoppingListStore = create<ShoppingListStore>()(persist((set, get) => ({
-  shoppingLists: [],
+  shoppingLists: shoppingListData,
 
   fetchShoppingLists: async () => {
     try {
@@ -41,6 +47,7 @@ export const useShoppingListStore = create<ShoppingListStore>()(persist((set, ge
           () =>
             resolve([
               {
+                id: "1",
                 name: "Groceries",
                 items: [
                   { itemName: "Apples", price: 3 },
@@ -48,6 +55,7 @@ export const useShoppingListStore = create<ShoppingListStore>()(persist((set, ge
                 ],
               },
               {
+                id: "2",
                 name: "Hardware",
                 items: [
                   { itemName: "Nails", price: 5 },

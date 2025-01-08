@@ -7,11 +7,10 @@ import Transactions from "./app/transactions";
 import BillsPage from "./app/bills";
 import BudgetsPage from "./app/budgets";
 import SavingGoals from "./app/savingGoals";
-import ShoppingListPage from "./app/shoppingList";
 import CategoriesPage from "./app/categories";
 import AddAccount from "./app/pages/AddAccount";
 
-import MarketingPage from "./app/(marketing)/page"; // Import the marketing page
+import MarketingPage from "./app/(marketing)/page"; // Import the marketing page 
 import BlogPage from "./app/(marketing)/blog/page";
 import PricingPage from "./app/(marketing)/pricing/page";
 import { SidebarProvider } from "./components/ui/sidebar";
@@ -23,6 +22,9 @@ import BudgetDetails from "./app/pages/BudgetDetails";
 import AddBudget from "./app/pages/AddBudget";
 import { currencies } from "./constants";
 import { useAccountStore } from "./stores/accountStore";
+import AddShoppingList from "./app/pages/AddShoppingList";
+import ShoppingListDetails from "./app/shoppingListDetails";
+import ShoppingListPage from "./app/pages/ShoppingListPage";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -114,8 +116,11 @@ function App() {
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/bills" element={<BillsPage />} />
             <Route path="/budgets" element={<BudgetsPage />} />
-            <Route path="/savingGoals" element={<SavingGoals />} />
             <Route path="/shoppingList" element={<ShoppingListPage />} />
+            <Route path="/savingGoals" element={<SavingGoals />} />
+            <Route path="/shoppingList/:id" element={<ShoppingListDetails />} />
+            <Route path="/shoppingList/new" element={<AddShoppingList />} />
+
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/account/new" element={<AddAccount />} />
             <Route path="/transaction/new" element={<AddTransaction />} />

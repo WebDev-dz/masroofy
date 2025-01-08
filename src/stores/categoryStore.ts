@@ -2,17 +2,16 @@ import { create } from 'zustand';
 import { Store, CategoryStoreState, CategoryStoreActions } from '../types/stores';
 import { Category } from '../types/models';
 import { persist } from 'zustand/middleware'
+import { categories } from '../constants';
 
 
 type CategoryStore = Store<CategoryStoreState, CategoryStoreActions>
 export const useCategoryStore = create <CategoryStore>()(persist((set, get) => ({
-    categories: [
-      
-    ],
+    categories: categories,
   
     fetchCategories: async () => {
       try {
-        set({ categories: [] }); // Clear categories before fetch starts
+        set({ categories: categories }); // Clear categories before fetch starts
         const response = await new Promise<Category[]>((resolve) =>
           setTimeout(
             () =>
@@ -23,7 +22,7 @@ export const useCategoryStore = create <CategoryStore>()(persist((set, get) => (
             1000
           )
         );
-        set({ categories: response });
+        set({ categories: categories });
         return { data: response, loading: false, error: null };
       } catch (error) {
         return { data: null, loading: false, error: error as Error };

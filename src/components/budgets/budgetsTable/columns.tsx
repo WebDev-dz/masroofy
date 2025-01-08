@@ -47,7 +47,7 @@ export const getBudgetColumns = ({
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Account" />
       ),
-      cell: ({ row }) => <div>{row.getValue("account.name")}</div>, // Assuming account has a name property
+      cell: ({ row }) => {console.log({row}); return <div>{row.original.account.name}</div>}, // Assuming account has a name property
     },
     {
       accessorKey: "period",

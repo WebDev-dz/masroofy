@@ -32,6 +32,7 @@ import { AsyncOperation, Transaction } from "../../types/models";
 import { useAccountStore } from "../../stores/accountStore";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useCategoryStore } from "../../stores/categoryStore";
+import { FormDialog } from "../category/form";
 
 export const transactionSchema = z.object({
   transactionId: z.number().positive(),
@@ -46,7 +47,7 @@ export const transactionSchema = z.object({
   }),
   tags: z.array(z.string()),
   fromAccountId: z.number().positive().nullable(),
-  toAccountId: z.number().positive().nullable(),
+  toAccountId: z.number().positive().nullable().optional(),
   type: z.enum(["income", "expense", "transfer"]),
   status: z.enum(["pending", "completed", "failed", "cancelled"]),
   description: z.string().optional(),
@@ -55,7 +56,7 @@ export const transactionSchema = z.object({
   updatedAt: z.string(),
 });
 
-type EntityFormType = "readonly" | "update" | "create";
+type EntityFormType = "readOnly" | "update" | "create";
 
 type EntityFormProps<T> = {
   type: EntityFormType;
@@ -76,7 +77,7 @@ export default function TransactionForm({
   const { toast } = useToast();
 
   const { accounts } = useAccountStore((state) => state);
-  const { categories } = useCategoryStore()
+  const { categories } = useCategoryStore();
 
   const form = useForm<z.infer<typeof transactionSchema>>({
     resolver: zodResolver(transactionSchema),
@@ -84,8 +85,31 @@ export default function TransactionForm({
   });
 
   async function handleSubmit(data: z.infer<typeof transactionSchema>) {
+    const newTransaction: Transaction = {
+      ...data,
+      tags: [],
+      fromAccountId: parseInt(`${data?.fromAccountId}`),
+      transactionId: Math.floor(Math.random() * 100000),
+      status: "completed",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    } as Transaction;
+
+    console.log({newTransaction})
     if (onSubmit) {
-      const response = await onSubmit(data as Transaction);
+      try {
+        transactionSchema.parse(newTransaction);
+      } catch (error) {
+        console.log(error)
+        toast({
+          title: "Error",
+          description: `Invalid form data: ${error}`,
+        })
+        return;
+      }
+      const response = await onSubmit(newTransaction as Transaction);
+      
+
       if (response) {
         toast({
           title: "Transaction Submitted",
@@ -126,27 +150,81 @@ export default function TransactionForm({
         <Form {...form}>
           <form
             onSubmit={(e) => {
-              console.log({data: form.getValues()})
-              e.preventDefault()
-              handleSubmit(form.getValues())
-              }}
+              console.log({ data: form.getValues() });
+              e.preventDefault();
+              handleSubmit(form.getValues());
+            }}
             className="space-y-6"
           >
-            
+            {/* Type */}
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">Transaction Type</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={(val) =>
+                        form.setValue("type", val as "income")
+                      }
+                      defaultValue={`income`}
+                      disabled={type === "readOnly" || !isEditing}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["income", "expense", "transfer"].map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type.toLocaleUpperCase()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          {/* title */}
+          <FormField
+              control={form.control}
+              name= "description"
+              render={({ field: {onChange, ...field} }) => (
+                <FormItem className="flex gap-3 items-center">
+                  <FormLabel className="basis-1/4">Transaction title</FormLabel>
+                  <FormControl>
+                  <Input
+                      type="string"
+                      placeholder="Title"
+                      onChange= {onChange}
+                      readOnly={type === "readOnly" || !isEditing}
+                      {...field}
+                    />
+                    
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
 
             {/* Amount */}
             <FormField
               control={form.control}
               name="amount"
-              render={({ field: {onChange, ...field} }) => (
+              render={({ field: { onChange, ...field } }) => (
                 <FormItem className="flex gap-3 items-center">
                   <FormLabel className="basis-1/4">Amount</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       placeholder="Amount"
-                      onChange={(e) => {form.setValue("amount", parseFloat(e.target.value))}}
-                      readOnly={type === "readonly" || !isEditing}
+                      onChange={(e) => {
+                        form.setValue("amount", parseFloat(e.target.value));
+                      }}
+                      readOnly={type === "readOnly" || !isEditing}
                       {...field}
                     />
                   </FormControl>
@@ -171,7 +249,7 @@ export default function TransactionForm({
                             "w-[240px] pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
-                          disabled={type === "readonly" || !isEditing}
+                          disabled={type === "readOnly" || !isEditing}
                         >
                           {field.value
                             ? format(new Date(field.value), "PPP")
@@ -179,7 +257,7 @@ export default function TransactionForm({
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      {type !== "readonly" && (
+                      {type !== "readOnly" && (
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
@@ -207,9 +285,9 @@ export default function TransactionForm({
                   <FormLabel className="basis-1/4">From Account</FormLabel>
                   <FormControl>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={(val) => {form.setValue("fromAccountId", parseInt(val))}}
                       defaultValue={`${field.value}`}
-                      disabled={type === "readonly" || !isEditing}
+                      disabled={type === "readOnly" || !isEditing}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select an account" />
@@ -231,30 +309,31 @@ export default function TransactionForm({
               )}
             />
 
-             {/* From Account */}
-             <FormField
+            {/* Category */}
+            <FormField
               control={form.control}
               name="category"
+
               render={({ field }) => (
                 <FormItem className="flex gap-3 items-center">
-                  <FormLabel className="basis-1/4">From Account</FormLabel>
+                  <FormLabel className="basis-1/4">Category</FormLabel>
                   <FormControl>
                     <Select
-                      onValueChange={(va) =>{
-                        form.setValue("category", categories.find((ca) => ca.id == (va))!)}}
-                      
-                      defaultValue={`${field.value}`}
-                      disabled={type === "readonly" || !isEditing}
+                      onValueChange={(va) => {
+                        form.setValue(
+                          "category",
+                          categories.find((ca) => ca.id == va)!
+                        );
+                      }}
+                      defaultValue={`${field.value.id}`}
+                      disabled={type === "readOnly" || !isEditing}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select an account" />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((cat) => (
-                          <SelectItem
-                            key={cat.id}
-                            value={`${cat.id}`}
-                          >
+                          <SelectItem key={cat.id} value={`${cat.id}`}>
                             {cat.name}
                           </SelectItem>
                         ))}
@@ -265,67 +344,45 @@ export default function TransactionForm({
                 </FormItem>
               )}
             />
-            {/* From Account */}
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem className="flex gap-3 items-center">
-                  <FormLabel className="basis-1/4">Transaction Type</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={(val) => form.setValue("fromAccountId", parseInt(val))}
-                      defaultValue={`${field.value}`}
-                      disabled={type === "readonly" || !isEditing}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {["income", "expense", "transfer"].map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type.toLocaleUpperCase()}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             { form.watch("type") == "transfer" ? <FormField
-              control={form.control}
-              name="toAccountId"
-              render={({ field: {value, onChange, ...field} }) => (
-                <FormItem className="flex gap-3 items-center">
-                  <FormLabel className="basis-1/4">To Account </FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={(val) => form.setValue("toAccountId", parseInt(val))}
-                      defaultValue={`${value}`}
-                      disabled={type === "readonly" || !isEditing}
-                      {...field}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an account" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((account) => (
-                          <SelectItem
-                            key={account.accountId}
-                            value={`${account.accountId}`}
-                          >
-                            {account.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />:<></>}
+
+            {form.watch("type") == "transfer" ? (
+              <FormField
+                control={form.control}
+                name="toAccountId"
+                render={({ field: { value, onChange, ...field } }) => (
+                  <FormItem className="flex gap-3 items-center">
+                    <FormLabel className="basis-1/4">To Account </FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={(val) =>
+                          form.setValue("toAccountId", parseInt(val))
+                        }
+                        defaultValue={`${value}`}
+                        disabled={type === "readOnly" || !isEditing}
+                        {...field}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an account" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accounts.map((account) => (
+                            <SelectItem
+                              key={account.accountId}
+                              value={`${account.accountId}`}
+                            >
+                              {account.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <></>
+            )}
 
             {/* Submit Button */}
             {type == "create" && <Button type="submit">{"Create"}</Button>}

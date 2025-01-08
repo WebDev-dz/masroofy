@@ -140,6 +140,7 @@ export type ShoppingItem = {
 
 
 export type ShoppingList = {
+  id: string,
   name: string;
   items: ShoppingItem []
 }

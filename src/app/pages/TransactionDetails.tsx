@@ -20,6 +20,8 @@ const TransactionDetails = () => {
     return <div>Transaction not found</div>; // Handle case when transaction is not found
   }
 
+  console.log({transaction})
+
   return (
     <div className="p-4 space-y-3">
       

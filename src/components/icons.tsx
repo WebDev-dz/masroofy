@@ -23,6 +23,7 @@ import {
   Plus,
   Settings,
   Shield,
+  Shirt,
   SunMedium,
   Trash,
   Twitter,
@@ -36,6 +37,7 @@ export type Icon = typeof LucideIcon
 
 export const Icons = {
   logo: Command,
+  shirt: Shirt,
   piggyBank: PiggyBank,
   close: X,
   airplane: AirVent,
